@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import { Home, Package, Users, Settings } from 'lucide-react';
 
-import useAuth from '@/hooks/useAuth'; // We will use this soon
+// useAuth is provided by the AuthContext
+import { useAuth } from '@/contexts/AuthContext';
 
 // This function correctly applies classes for active/inactive links
 const navLinkClasses = ({ isActive }) =>
