@@ -4,20 +4,29 @@ import User from '../models/User.js';
 // @route   GET /api/users/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
-  // req.user is made available by our 'protect' middleware
-  const user = await User.findById(req.user._id);
+  try {
+    // req.user is made available by our 'protect' middleware
+    const user = await User.findById(req.user._id);
 
-  if (user) {
-    res.status(200).json({
-      _id: user._id,
-      fullName: user.fullName,
-      email: user.email,
-      role: user.role,
-      startup: user.startup,
-      department: user.department,
+    if (user) {
+      res.status(200).json({
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        startup: user.startup,
+        department: user.department,
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('ERROR IN getUserProfile:', error); // Explicitly log the error
+    res.status(500).json({
+      message: 'Server error in getUserProfile',
+      error: error.message,
+      stack: error.stack,
     });
-  } else {
-    res.status(404).json({ message: 'User not found' });
   }
 };
 

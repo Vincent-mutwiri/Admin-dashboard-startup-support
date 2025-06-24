@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'; // Import cookie-parser
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js'; // Import our new auth routes
 import userRoutes from './routes/userRoutes.js'; // Import our new user routes
+import { notFound, errorHandler } from './middleware/errorMiddleware.js'; // Import error handlers
 
 dotenv.config();
 connectDB();
@@ -13,7 +14,7 @@ const app = express();
 
 // --- MIDDLEWARE SETUP ---
 // Enable CORS - Cross-Origin Resource Sharing
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:5174', credentials: true }));
 
 // Body parser middleware to parse JSON data
 app.use(express.json());
@@ -32,6 +33,11 @@ app.use('/api/users', userRoutes); // Use the user routes for any URL starting w
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
+
+// --- ERROR HANDLING MIDDLEWARE ---
+app.use(notFound);
+app.use(errorHandler);
+// --- END ERROR HANDLING MIDDLEWARE ---
 
 const PORT = process.env.PORT || 5000;
 
