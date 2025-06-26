@@ -12,11 +12,16 @@ import { protect} from '../middleware/authMiddleware.js';
 import { permit } from '../middleware/roleMiddleware.js';
 
 // User-specific routes. These routes are for the logged-in user to manage their own profile.
-// The '/profile' route is a common convention.
+// Both '/profile' and '/me' routes are supported for getting the current user's profile.
 router
   .route('/profile')
   .get(protect, getUserProfile)      // Any logged-in user can get their own profile
   .put(protect, updateUserProfile);  // Any logged-in user can update their own profile
+
+// Alias for /profile that follows REST conventions
+router
+  .route('/me')
+  .get(protect, getUserProfile);     // Any logged-in user can get their own profile
 
 // Admin-specific routes. These require the user to have the 'admin' role.
 // We use permit('admin') to enforce this.

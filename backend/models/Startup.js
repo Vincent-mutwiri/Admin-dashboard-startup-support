@@ -4,17 +4,40 @@ const startupSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true, // This field must be provided
-      unique: true,   // No two startups can have the same name
+      required: [true, 'Startup name is required'],
+      unique: true,
+      trim: true,
+      maxlength: [100, 'Name cannot be more than 100 characters']
     },
     description: {
       type: String,
-      required: true,
+      required: [true, 'Description is required'],
+      trim: true,
+      maxlength: [1000, 'Description cannot be more than 1000 characters']
     },
+    cohort: {
+      type: String,
+      required: [true, 'Cohort is required'],
+      trim: true,
+      enum: {
+        values: ['2023', '2024', '2025'],
+        message: 'Cohort must be one of: 2023, 2024, 2025'
+      }
+    },
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Department',
+      required: false
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    }
   },
   {
-    // Automatically add 'createdAt' and 'updatedAt' fields
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
 

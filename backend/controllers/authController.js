@@ -7,58 +7,59 @@ import generateToken from '../utils/generateToken.js';
 // @route   POST /api/auth/signup
 // @access  Public
 const signupUser = async (req, res) => {
-  const { fullName, email, password, role, affiliationType, affiliationName } = req.body;
+  try {
+    const { fullName, email, password, role, assignedDepartment } = req.body;
 
-  // Basic validation
-  if (!fullName || !email || !password || !role) {
-    return res.status(400).json({ message: 'Please fill in all required fields.' });
-  }
-
-  const userExists = await User.findOne({ email });
-
-  if (userExists) {
-    return res.status(400).json({ message: 'User with this email already exists.' });
-  }
-  
-  // Create the user object
-  const user = new User({
-    fullName,
-    email,
-    password, // Password will be hashed by the pre-save hook in the User model
-    role,
-  });
-
-  // Handle affiliation
-  if (affiliationType && affiliationName) {
-    if (affiliationType === 'startup') {
-      let startup = await Startup.findOne({ name: affiliationName });
-      // For simplicity, let's create the startup if it doesn't exist.
-      // In a real app, you might want this to be a pre-populated list.
-      if (!startup) {
-        startup = await Startup.create({ name: affiliationName, description: 'Auto-generated description' });
-      }
-      user.startup = startup._id;
-    } else if (affiliationType === 'department') {
-      let department = await Department.findOne({ name: affiliationName });
-      if (!department) {
-        department = await Department.create({ name: affiliationName, description: 'Auto-generated description' });
-      }
-      user.department = department._id;
+    // Enhanced validation
+    if (!fullName || !email || !password || !role || !assignedDepartment) {
+      return res.status(400).json({ success: false, message: 'Please provide all required fields, including department.' });
     }
-  }
 
-  await user.save();
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: 'User with this email already exists.' });
+    }
 
-  if (user) {
+    // Verify the department exists
+    const departmentExists = await Department.findById(assignedDepartment);
+    if (!departmentExists) {
+      return res.status(400).json({ success: false, message: 'Invalid department selected.' });
+    }
+
+    // Create the user
+    const user = await User.create({
+      fullName,
+      email,
+      password, // Hashed by pre-save hook
+      role,
+      assignedDepartment, // Use the new, correct field
+    });
+
+    // Generate token and send response
     generateToken(res, user._id);
-    res.status(201).json({
+
+    const userResponse = {
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
       role: user.role,
+      assignedDepartment: user.assignedDepartment,
+      avatarUrl: user.avatarUrl,
+    };
+
+    res.status(201).json({ success: true, user: userResponse });
+
+  } catch (error) {
+    console.error('ERROR in signupUser:', {
+      message: error.message,
+      stack: error.stack,
     });
-  } else {
-    res.status(400).json({ message: 'Invalid user data.' });
+    
+    res.status(500).json({
+      success: false,
+      message: 'Server error during signup.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+    });
   }
 };
 
@@ -66,20 +67,66 @@ const signupUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
+    console.log('Login attempt for email:', email);
 
-  const user = await User.findOne({ email });
+    if (!email || !password) {
+      console.log('Missing email or password');
+      return res.status(400).json({ success: false, message: 'Please provide both email and password' });
+    }
 
-  if (user && (await user.matchPassword(password))) {
+    const user = await User.findOne({ email }).select('+password +isActive');
+    
+    if (!user) {
+      console.log('No user found with email:', email);
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    console.log('User found, checking password...');
+    const isMatch = await user.correctPassword(password);
+    console.log('Password match result:', isMatch);
+    
+    if (!isMatch) {
+      console.error('Invalid password for email:', email);
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    // Check if the user's account is active
+    if (!user.isActive) {
+      return res.status(403).json({ success: false, message: 'Your account has been deactivated.' });
+    }
+    
+    // Generate and set JWT token in HTTP-only cookie
     generateToken(res, user._id);
-    res.status(200).json({
+
+    // Update the last login timestamp without triggering validation
+    user.lastLogin = Date.now();
+    await user.save({ validateBeforeSave: false });
+
+    // Return user data (excluding password)
+    const userResponse = {
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
       role: user.role,
+      startup: user.startup,
+      department: user.department,
+      avatarUrl: user.avatarUrl, // Include virtual property
+    };
+
+    res.status(200).json({ success: true, user: userResponse });
+  } catch (error) {
+    console.error('ERROR in loginUser:', {
+      message: error.message,
+      stack: error.stack,
     });
-  } else {
-    res.status(401).json({ message: 'Invalid email or password.' });
+    
+    res.status(500).json({
+      success: false,
+      message: 'Server error during login',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+    });
   }
 };
 
@@ -87,14 +134,31 @@ const loginUser = async (req, res) => {
 // @route   POST /api/auth/logout
 // @access  Private
 const logoutUser = (req, res) => {
-  // The 'jwt' here must match the name of the cookie we set in generateToken
-  res.cookie('jwt', '', {
-    httpOnly: true,
-    expires: new Date(0), // Set to a past date to expire it immediately
-  });
-  res.status(200).json({ message: 'Logged out successfully' });
-};
+  try {
+    console.log('Logout request received');
+    
+    // Clear the JWT cookie by setting it to empty and expiring it
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use secure in production
+      sameSite: 'strict',
+      expires: new Date(0),
+    });
 
+    console.log('User logged out successfully');
+    res.status(200).json({ message: 'User logged out successfully' });
+  } catch (error) {
+    console.error('ERROR in logoutUser:', {
+      message: error.message,
+      stack: error.stack
+    });
+    
+    res.status(500).json({
+      message: 'Error during logout',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
 
 // We will add forgot/reset password later.
 // For now, let's export these functions.

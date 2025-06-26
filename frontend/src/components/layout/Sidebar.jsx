@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { Home, Package, Users, Settings } from 'lucide-react';
 
-import useAuth from '@/hooks/useAuth'; // We will use this soon
+// import useAuth from '@/hooks/useAuth'; // We will use this soon
 
 // This function correctly applies classes for active/inactive links
 const navLinkClasses = ({ isActive }) =>
@@ -10,7 +10,7 @@ const navLinkClasses = ({ isActive }) =>
   }`;
 
 export default function Sidebar() {
-  const { can } = useAuth(); // Example for role-based rendering later
+  // const { can } = useAuth(); // Example for role-based rendering later
 
   return (
     // This is a crucial line: It hides the sidebar on mobile and shows it as a block on medium+ screens

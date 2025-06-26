@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Layouts and Pages
 import MainLayout from './components/layout/MainLayout';
@@ -7,38 +7,38 @@ import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
 
+// Import pages
+import StartupsPage from './pages/StartupsPage';
+
 // Placeholder pages for our new links
-const StartupsPage = () => <div>Startups Page Content</div>;
 const SettingsPage = () => <div>Settings Page Content</div>;
 const ProfilePage = () => <div>Profile Page Content</div>;
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Public routes that do not have the main layout */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+    <Routes>
+      {/* Public routes that do not have the main layout */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
 
-        {/* Protected routes that use the main layout */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
-          {/* The Outlet in MainLayout will render these nested routes */}
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="startups" element={<StartupsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
+      {/* Protected routes that use the main layout */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* The Outlet in MainLayout will render these nested routes */}
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="startups" element={<StartupsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+      </Route>
 
-      </Routes>
-    </Router>
+    </Routes>
   );
 }
 

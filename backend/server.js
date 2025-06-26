@@ -3,8 +3,10 @@ import dotenv from 'dotenv';
 import cors from 'cors'; // Import cors
 import cookieParser from 'cookie-parser'; // Import cookie-parser
 import connectDB from './config/db.js';
-import authRoutes from './routes/authRoutes.js'; // Import our new auth routes
-import userRoutes from './routes/userRoutes.js'; // Import our new user routes
+import authRoutes from './routes/authRoutes.js'; // Import our auth routes
+import userRoutes from './routes/userRoutes.js'; // Import our user routes
+import startupRoutes from './routes/startupRoutes.js'; // Import our startup routes
+import departmentRoutes from './routes/departmentRoutes.js'; // Import our department routes
 import { notFound, errorHandler } from './middleware/errorMiddleware.js'; // Import error handlers
 
 dotenv.config();
@@ -28,6 +30,8 @@ app.use(cookieParser());
 // --- API ROUTES ---
 app.use('/api/auth', authRoutes); // Use the auth routes for any URL starting with /api/auth
 app.use('/api/users', userRoutes); // Use the user routes for any URL starting with /api/users
+app.use('/api/startups', startupRoutes); // Use the startup routes for any URL starting with /api/startups
+app.use('/api/departments', departmentRoutes); // Use the department routes for any URL starting with /api/departments
 // --- END API ROUTES ---
 
 app.get('/', (req, res) => {
