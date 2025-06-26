@@ -2,6 +2,18 @@ import api from './api';
 
 const API_URL = '/milestones';
 
+// Get all milestones for a specific department
+export const getMilestones = async (departmentId) => {
+  try {
+    const response = await api.get(`${API_URL}/departments/${departmentId}`);
+    // The API returns { success, data } so we return the data array
+    return response.data.data || [];
+  } catch (error) {
+    console.error('Error fetching milestones:', error);
+    throw error;
+  }
+};
+
 export const getMilestonesByDepartment = async (departmentId) => {
   const response = await api.get(`${API_URL}/departments/${departmentId}`);
   return response.data;

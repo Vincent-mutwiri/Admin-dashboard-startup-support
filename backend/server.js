@@ -9,7 +9,9 @@ import startupRoutes from './routes/startupRoutes.js'; // Import our startup rou
 import departmentRoutes from './routes/departmentRoutes.js'; // Import our department routes
 import resourceRoutes from './routes/resourceRoutes.js'; // Import our resource routes
 import milestoneRoutes from './routes/milestoneRoutes.js'; // Import our milestone routes
+import deliverableRoutes from './routes/deliverableRoutes.js'; // Import our deliverable routes
 import meetingRoutes from './routes/meetingRoutes.js'; // Import our meeting routes
+import testRoutes from './routes/testRoutes.js'; // Import our test routes
 import { notFound, errorHandler } from './middleware/errorMiddleware.js'; // Import error handlers
 
 dotenv.config();
@@ -80,8 +82,13 @@ app.use('/api/resources', resourceRoutes);
 // Mount milestone routes
 app.use('/api/milestones', milestoneRoutes);
 
+// Mount deliverable routes
+app.use('/api/deliverables', deliverableRoutes);
+
 // Mount meeting routes
 app.use('/api/meetings', meetingRoutes);
+// Mount test routes
+app.use('/api/test', testRoutes);
 // --- END API ROUTES ---
 
 app.get('/', (req, res) => {

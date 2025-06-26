@@ -6,7 +6,9 @@ import {
   createMilestone,
   updateMilestone,
   deleteMilestone,
-  getMilestonesSummary
+  getMilestonesSummary,
+  addCommentToMilestone,
+  getMilestoneComments
 } from '../controllers/milestoneController.js';
 
 const router = express.Router();
@@ -62,5 +64,18 @@ router.delete(
   permit('admin', 'editor'),
   deleteMilestone
 );
+
+// Comment routes
+router.route('/:id/comments')
+  // Get all comments for a milestone - Accessible by department members
+  .get(
+    permit('admin', 'editor', 'user'),
+    getMilestoneComments
+  )
+  // Add a comment to a milestone - Accessible by department members
+  .post(
+    permit('admin', 'editor', 'user'),
+    addCommentToMilestone
+  );
 
 export default router;

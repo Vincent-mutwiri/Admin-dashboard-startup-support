@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getMilestonesByDepartment } from '@/services/milestoneService';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import { MilestoneDialog } from '@/components/dialogs/MilestoneDialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,7 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, ExternalLink } from 'lucide-react';
 
 const statusVariantMap = {
   'Not Started': 'outline',
@@ -72,6 +73,7 @@ export default function DepartmentMilestones({ departmentId }) {
   });
 
   const handleEdit = (milestone) => {
+    console.log('Edit milestone clicked:', milestone);
     setEditingMilestone(milestone);
     setIsDialogOpen(true);
   };
@@ -228,7 +230,13 @@ export default function DepartmentMilestones({ departmentId }) {
             </select>
           </div>
           
-          <Button onClick={() => setIsDialogOpen(true)} className="whitespace-nowrap">
+          <Button 
+            onClick={() => {
+              console.log('Add Milestone button clicked, setting isDialogOpen to true');
+              setIsDialogOpen(true);
+            }} 
+            className="whitespace-nowrap"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Milestone
           </Button>
@@ -344,6 +352,7 @@ export default function DepartmentMilestones({ departmentId }) {
       <MilestoneDialog
         open={isDialogOpen}
         onOpenChange={(open) => {
+          console.log('Dialog open state changed:', open);
           setIsDialogOpen(open);
           if (!open) setEditingMilestone(null);
         }}

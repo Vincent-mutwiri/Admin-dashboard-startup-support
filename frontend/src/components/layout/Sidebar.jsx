@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Package, Users, Settings, Building2 } from 'lucide-react';
+import { Home, Package, Users, Settings, Building2, Milestone } from 'lucide-react';
 
 // import useAuth from '@/hooks/useAuth'; // We will use this soon
 
@@ -12,6 +12,7 @@ const navLinks = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Startups', href: '/startups', icon: Package },
   { name: 'Departments', href: '/departments', icon: Building2 },
+  { name: 'Milestones', href: '/milestones', icon: Milestone },
   { name: 'Users', href: '/users', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];

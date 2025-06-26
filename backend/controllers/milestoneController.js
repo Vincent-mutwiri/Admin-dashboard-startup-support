@@ -232,11 +232,142 @@ const getMilestonesSummary = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Add a comment to a milestone
+// @route   POST /api/milestones/:id/comments
+// @access  Private
+const addCommentToMilestone = asyncHandler(async (req, res) => {
+  try {
+    console.log('=== ADD COMMENT REQUEST ===');
+    console.log('Request params:', req.params);
+    console.log('Request body:', req.body);
+    console.log('Authenticated user:', req.user ? { 
+      id: req.user._id, 
+      role: req.user.role,
+      assignedDepartment: req.user.assignedDepartment 
+    } : 'No user');
+    
+    const { text } = req.body;
+    
+    // Validate comment text
+    if (!text || typeof text !== 'string' || text.trim() === '') {
+      console.error('Validation failed: Invalid comment text:', text);
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide valid comment text'
+      });
+    }
+
+    // Find the milestone
+    const milestone = await Milestone.findById(req.params.id);
+    
+    if (!milestone) {
+      console.error(`Milestone not found with id: ${req.params.id}`);
+      return res.status(404).json({
+        success: false,
+        error: 'Milestone not found'
+      });
+    }
+
+    // Check authorization
+    const hasAccess = req.user.role === 'admin' || 
+      (req.user.assignedDepartment && 
+       req.user.assignedDepartment.toString() === milestone.department.toString());
+    
+    if (!hasAccess) {
+      console.error('Authorization failed:', {
+        userRole: req.user.role,
+        userDept: req.user.assignedDepartment,
+        milestoneDept: milestone.department
+      });
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to comment on this milestone'
+      });
+    }
+
+    // Create and save the comment
+    const comment = {
+      text: text.trim(),
+      author: req.user._id,
+      createdAt: new Date()
+    };
+
+    console.log('Adding comment:', comment);
+    milestone.comments.push(comment);
+    await milestone.save();
+    
+    // Get the populated comment
+    const updatedMilestone = await Milestone.findById(milestone._id)
+      .populate({
+        path: 'comments.author',
+        select: 'name email',
+        options: { lean: true }
+      });
+      
+    const newComment = updatedMilestone.comments[updatedMilestone.comments.length - 1];
+    
+    console.log('Comment added successfully:', newComment);
+    
+    res.status(201).json({
+      success: true,
+      data: newComment
+    });
+  } catch (error) {
+    console.error('Error in addCommentToMilestone:', {
+      message: error.message,
+      stack: error.stack,
+      params: req.params,
+      body: req.body,
+      user: req.user || 'No user'
+    });
+    
+    res.status(500).json({
+      success: false,
+      error: 'Server error while adding comment'
+    });
+  }
+});
+
+// @desc    Get all comments for a milestone
+// @route   GET /api/milestones/:id/comments
+// @access  Private
+const getMilestoneComments = asyncHandler(async (req, res) => {
+  const milestone = await Milestone.findById(req.params.id)
+    .select('comments')
+    .populate({
+      path: 'comments.author',
+      select: 'name email avatar'
+    });
+
+  if (!milestone) {
+    res.status(404);
+    throw new Error('Milestone not found');
+  }
+
+  // Check if user has access to this milestone's department
+  const hasAccess = req.user.role === 'admin' || 
+    (req.user.assignedDepartment && 
+     req.user.assignedDepartment.toString() === milestone.department.toString());
+  
+  if (!hasAccess) {
+    res.status(403);
+    throw new Error('Not authorized to view comments for this milestone');
+  }
+
+  res.status(200).json({
+    success: true,
+    count: milestone.comments.length,
+    data: milestone.comments
+  });
+});
+
 export {
   getMilestonesByDepartment,
   getMilestone,
   createMilestone,
   updateMilestone,
   deleteMilestone,
-  getMilestonesSummary
+  getMilestonesSummary,
+  addCommentToMilestone,
+  getMilestoneComments
 };

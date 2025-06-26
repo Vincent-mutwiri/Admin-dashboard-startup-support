@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createMilestone, updateMilestone } from '@/services/milestoneService';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MilestoneForm } from '@/components/forms/MilestoneForm';
 
@@ -11,9 +11,15 @@ export function MilestoneDialog({
   departmentId, 
   milestone = null 
 }) {
+  console.log('MilestoneDialog rendered with props:', { open, departmentId, milestone });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEdit = !!milestone;
+  
+  // Debug effect to log when the dialog opens/closes
+  useEffect(() => {
+    console.log('MilestoneDialog open state changed:', open);
+  }, [open]);
 
   const createMutation = useMutation({
     mutationFn: (data) => createMilestone({ ...data, department: departmentId }),
@@ -50,16 +56,35 @@ export function MilestoneDialog({
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   const handleSubmit = async (data) => {
-    if (isEdit) {
-      await updateMutation.mutateAsync(data);
-    } else {
-      await createMutation.mutateAsync(data);
+    console.log('Submitting milestone form with data:', data);
+    try {
+      if (isEdit) {
+        console.log('Updating existing milestone');
+        await updateMutation.mutateAsync(data);
+      } else {
+        console.log('Creating new milestone');
+        await createMutation.mutateAsync(data);
+      }
+    } catch (error) {
+      console.error('Error submitting milestone form:', error);
+      throw error;
     }
   };
 
+  console.log('Rendering MilestoneDialog with open:', open);
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent 
+        className="sm:max-w-[500px] z-[100]"
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 1000,
+        }}
+      >
         <DialogHeader>
           <DialogTitle>
             {isEdit ? 'Edit Milestone' : 'Create New Milestone'}
