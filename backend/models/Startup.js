@@ -20,8 +20,8 @@ const startupSchema = new mongoose.Schema(
       required: [true, 'Cohort is required'],
       trim: true,
       enum: {
-        values: ['2023', '2024', '2025'],
-        message: 'Cohort must be one of: 2023, 2024, 2025'
+        values: ['I', 'II', 'III'],
+        message: 'Cohort must be one of: I, II, III'
       }
     },
     department: {

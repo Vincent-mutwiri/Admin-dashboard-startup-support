@@ -58,7 +58,7 @@ export default function StartupsPage() {
   };
 
   // Available cohorts - should match the backend's allowed values
-  const cohorts = ['2023', '2024', '2025'];
+  const cohorts = ['I', 'II', 'III'];
 
   if (isLoading) {
     return (

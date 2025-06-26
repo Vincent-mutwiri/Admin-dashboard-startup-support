@@ -39,7 +39,7 @@ const createStartup = async (req, res) => {
 
     // Ensure cohort is a string and one of the allowed values
     const cohortStr = String(cohort);
-    const allowedCohorts = ['2023', '2024', '2025'];
+    const allowedCohorts = ['I', 'II', 'III'];
     if (!allowedCohorts.includes(cohortStr)) {
       return res.status(400).json({ 
         success: false,

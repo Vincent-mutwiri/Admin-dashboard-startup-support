@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage';
 
 // Import pages
 import StartupsPage from './pages/StartupsPage';
+import ProjectsPage from './pages/ProjectsPage';
 
 // Placeholder pages for our new links
 const SettingsPage = () => <div>Settings Page Content</div>;
@@ -34,6 +35,7 @@ function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="startups" element={<StartupsPage />} />
+        <Route path="projects" element={<ProjectsPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>

@@ -32,10 +32,10 @@ const formSchema = z.object({
 });
 
 // Available cohorts
-const cohorts = [
-  { value: '2023', label: '2023 Cohort' },
-  { value: '2024', label: '2024 Cohort' },
-  { value: '2025', label: '2025 Cohort' },
+const cohortOptions = [
+  { value: 'I', label: 'Cohort I' },
+  { value: 'II', label: 'Cohort II' },
+  { value: 'III', label: 'Cohort III' },
 ];
 
 export function StartupFormDialog({ isOpen, setIsOpen, startup }) {
@@ -47,7 +47,7 @@ export function StartupFormDialog({ isOpen, setIsOpen, startup }) {
     defaultValues: {
       name: '',
       description: '',
-      cohort: cohorts[0].value, // Default to first cohort
+      cohort: cohortOptions[0].value, // Default to first cohort
     },
     mode: 'onChange',
   });
@@ -59,13 +59,13 @@ export function StartupFormDialog({ isOpen, setIsOpen, startup }) {
         form.reset({
           name: startup.name || '',
           description: startup.description || '',
-          cohort: startup.cohort ? String(startup.cohort) : cohorts[0].value,
+          cohort: startup.cohort ? String(startup.cohort) : cohortOptions[0].value,
         });
       } else {
         form.reset({
           name: '',
           description: '',
-          cohort: cohorts[0].value
+          cohort: cohortOptions[0].value
         });
       }
     }
@@ -170,7 +170,7 @@ export function StartupFormDialog({ isOpen, setIsOpen, startup }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {cohorts.map((cohort) => (
+                      {cohortOptions.map((cohort) => (
                         <SelectItem key={cohort.value} value={cohort.value}>
                           {cohort.label}
                         </SelectItem>
