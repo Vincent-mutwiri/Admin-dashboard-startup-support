@@ -13,6 +13,8 @@ import DashboardPage from './pages/DashboardPage';
 import StartupsPage from './pages/StartupsPage';
 import ProjectsPage from './pages/ProjectsPage';
 import DepartmentsPage from './pages/departments/DepartmentsPage';
+import DepartmentDetailPage from './pages/departments/DepartmentDetailPage';
+import MilestoneDetailPage from './pages/milestones/MilestoneDetailPage';
 
 // Placeholder pages for our new links
 const SettingsPage = () => <div>Settings Page Content</div>;
@@ -42,6 +44,8 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="startups" element={<StartupsPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
+          <Route path="departments/:deptId" element={<DepartmentDetailPage />} />
+          <Route path="milestones/:id" element={<MilestoneDetailPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="profile" element={<ProfilePage />} />

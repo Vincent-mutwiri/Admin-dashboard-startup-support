@@ -33,8 +33,7 @@ import {
   FormMessage,
   Input,
   Textarea,
-  useToast,
-  Badge,
+  Badge
 } from '../../components/ui';
 import { PlusCircle, MoreHorizontal, Pencil, Trash2, Loader2, ExternalLink } from 'lucide-react';
 
@@ -46,7 +45,30 @@ const departmentSchema = z.object({
 export default function DepartmentsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  // Toast notifications are now available via the sonner toast import
+  const showToast = (title, description, type = 'success') => {
+    const toastOptions = {
+      description,
+      duration: 3000,
+    };
+
+    switch (type) {
+      case 'success':
+        toast.success(title, toastOptions);
+        break;
+      case 'error':
+        toast.error(title, toastOptions);
+        break;
+      case 'warning':
+        toast.warning(title, toastOptions);
+        break;
+      case 'info':
+        toast.info(title, toastOptions);
+        break;
+      default:
+        toast(title, toastOptions);
+    }
+  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState(null);
 
@@ -62,12 +84,13 @@ export default function DepartmentsPage() {
 
   const mutationOptions = {
     onSuccess: () => queryClient.invalidateQueries(['departments']),
-    onError: (err) => {
-      toast({
-        title: 'Error',
-        description: err.response?.data?.message || 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
+    onError: (error) => {
+      console.error('Error:', error);
+      showToast(
+        'Error',
+        error.response?.data?.message || 'An error occurred.',
+        'error'
+      );
     },
   };
 
@@ -76,7 +99,7 @@ export default function DepartmentsPage() {
     mutationFn: createDepartment,
     onSuccess: (...args) => {
       mutationOptions.onSuccess(...args);
-      toast({ title: 'Success', description: 'Department created successfully.' });
+      showToast('Success', 'Department created successfully.');
       setIsDialogOpen(false);
       form.reset();
     },
@@ -87,7 +110,7 @@ export default function DepartmentsPage() {
     mutationFn: updateDepartment,
     onSuccess: (...args) => {
       mutationOptions.onSuccess(...args);
-      toast({ title: 'Success', description: 'Department updated successfully.' });
+      showToast('Success', 'Department updated successfully.');
       setIsDialogOpen(false);
       form.reset();
       setEditingDepartment(null);
@@ -98,19 +121,11 @@ export default function DepartmentsPage() {
     mutationFn: deleteDepartment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['departments'] });
-      toast({
-        title: 'Success',
-        description: 'Department deleted successfully.',
-        variant: 'default'
-      });
+      showToast('Success', 'Department deleted successfully.');
     },
     onError: (error) => {
       const errorMessage = error.response?.data?.message || 'Failed to delete department. Please try again.';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive'
-      });
+      showToast('Error', errorMessage, 'error');
     },
   });
 

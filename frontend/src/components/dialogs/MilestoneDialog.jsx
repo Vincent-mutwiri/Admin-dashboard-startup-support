@@ -1,0 +1,85 @@
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createMilestone, updateMilestone } from '@/services/milestoneService';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MilestoneForm } from '@/components/forms/MilestoneForm';
+
+export function MilestoneDialog({ 
+  open, 
+  onOpenChange, 
+  departmentId, 
+  milestone = null 
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const isEdit = !!milestone;
+
+  const createMutation = useMutation({
+    mutationFn: (data) => createMilestone({ ...data, department: departmentId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['milestones', departmentId]);
+      toast.success('Milestone created', {
+        description: 'The milestone has been created successfully.',
+      });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast.error('Error', {
+        description: error.response?.data?.message || 'Failed to create milestone',
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data) => updateMilestone({ id: milestone?._id, ...data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['milestones', departmentId]);
+      toast.success('Milestone updated', {
+        description: 'The milestone has been updated successfully.',
+      });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast.error('Error', {
+        description: error.response?.data?.message || 'Failed to update milestone',
+      });
+    },
+  });
+
+  const isLoading = createMutation.isPending || updateMutation.isPending;
+
+  const handleSubmit = async (data) => {
+    if (isEdit) {
+      await updateMutation.mutateAsync(data);
+    } else {
+      await createMutation.mutateAsync(data);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>
+            {isEdit ? 'Edit Milestone' : 'Create New Milestone'}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <MilestoneForm
+            onSubmit={handleSubmit}
+            defaultValues={milestone ? {
+              title: milestone.title,
+              description: milestone.description,
+              status: milestone.status,
+              dueDate: milestone.dueDate ? new Date(milestone.dueDate) : new Date(),
+            } : undefined}
+            isLoading={isLoading}
+            submitLabel={isEdit ? 'Update Milestone' : 'Create Milestone'}
+            onCancel={() => onOpenChange(false)}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

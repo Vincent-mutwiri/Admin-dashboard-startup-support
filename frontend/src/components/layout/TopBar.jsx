@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function TopBar() {
@@ -50,7 +50,7 @@ export default function TopBar() {
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col p-0">
           <div className="flex h-[60px] items-center border-b px-4">
-            <h2 className="text-lg font-semibold">Menu</h2>
+            <SheetTitle className="text-lg font-semibold m-0">Menu</SheetTitle>
           </div>
           <nav className="flex-1 space-y-1 p-4">
             <NavLink

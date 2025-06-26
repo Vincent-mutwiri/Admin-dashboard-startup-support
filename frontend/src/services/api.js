@@ -40,21 +40,46 @@ api.interceptors.response.use(
   (error) => {
     // Handle any response errors
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
+      const { status, data } = error.response;
+      
       console.error('Response error:', {
-        status: error.response.status,
+        status,
         statusText: error.response.statusText,
-        data: error.response.data,
-        headers: error.response.headers
+        data,
+        url: error.config?.url
       });
       
-      // Handle 401 Unauthorized
-      if (error.response.status === 401) {
-        // Clear any existing tokens
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login?session=expired';
+      // Only handle 401 for specific authentication endpoints
+      if (status === 401) {
+        // Only redirect to login if we're not already on the login page
+        // and it's not an API endpoint that might return 401 for other reasons
+        const isAuthEndpoint = error.config?.url?.includes('/auth/');
+        const isLoginPage = window.location.pathname === '/login';
+        
+        if (!isAuthEndpoint && !isLoginPage) {
+          // Only clear tokens if we're sure it's a session expiration
+          if (data?.message?.toLowerCase().includes('expired') || 
+              data?.error?.toLowerCase().includes('expired') ||
+              data?.message?.toLowerCase().includes('invalid token') ||
+              data?.error?.toLowerCase().includes('invalid token')) {
+            if (typeof window !== 'undefined') {
+              // Clear any stored tokens
+              localStorage.removeItem('token');
+              sessionStorage.removeItem('token');
+              // Redirect to login with session expired flag
+              window.location.href = '/login?session=expired';
+            }
+            // Don't continue with the error chain
+            return Promise.reject({ isHandled: true });
+          }
         }
+      }
+      
+      // For 404s, just log and continue
+      if (status === 404) {
+        console.warn('Resource not found:', error.config?.url);
+        // Don't redirect, just reject with the error
+        return Promise.reject(error);
       }
     } else if (error.request) {
       // The request was made but no response was received

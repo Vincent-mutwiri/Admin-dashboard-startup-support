@@ -9,8 +9,8 @@ export default defineConfig({
     postcss: './postcss.config.js'
   },
   server: {
-    port: 5181,
-    strictPort: true, // Don't try to find another port if 5181 is in use
+    port: 5174,
+    strictPort: true, // Don't try to find another port if 5174 is in use
     open: true,
     proxy: {
       // Proxy API requests to the backend
@@ -28,6 +28,7 @@ export default defineConfig({
             console.log('Proxying request to:', req.method, req.path);
             // Ensure proper headers are set
             proxyReq.setHeader('origin', 'http://localhost:5174');
+            proxyReq.setHeader('host', 'localhost:5000');
             proxyReq.setHeader('referer', 'http://localhost:5174');
             // Log the actual URL being requested
             console.log('Actual request URL:', proxyReq.path);

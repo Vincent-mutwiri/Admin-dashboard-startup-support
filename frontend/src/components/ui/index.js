@@ -8,6 +8,9 @@ export * from './textarea';
 // UI Components
 export * from './alert';
 export * from './avatar';
+import Badge, { badgeVariants } from './badge';
+
+export { Badge, badgeVariants };
 export * from './card';
 export * from './dialog';
 export * from './dropdown-menu';

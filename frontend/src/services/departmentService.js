@@ -7,10 +7,7 @@ export const getDepartments = async () => {
   return response.data;
 };
 
-export const getDepartmentById = async (id) => {
-  const response = await api.get(`${API_URL}/${id}`);
-  return response.data;
-};
+export const getDepartmentById = (id) => api.get(`/departments/${id}`);
 
 export const createDepartment = async (data) => {
   const response = await api.post(API_URL, data);
