@@ -9,7 +9,8 @@ export default defineConfig({
     postcss: './postcss.config.js'
   },
   server: {
-    port: 5174,
+    port: 5181,
+    strictPort: true, // Don't try to find another port if 5181 is in use
     open: true,
     proxy: {
       // Proxy API requests to the backend
@@ -34,12 +35,7 @@ export default defineConfig({
         }
       }
     },
-    cors: {
-      origin: 'http://localhost:5174',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      allowedHeaders: 'Content-Type,Authorization',
-      credentials: true
-    }
+    cors: false
   },
   resolve: {
     alias: {

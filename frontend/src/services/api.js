@@ -2,16 +2,22 @@ import axios from 'axios';
 
 // Create axios instance with base URL and credentials
 const api = axios.create({
-  baseURL: '/api', // This will be proxied to http://localhost:5000/api in development
+  baseURL: 'http://localhost:5000/api', // Backend server URL with /api prefix
   withCredentials: true, // Important for sending/receiving cookies with requests
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
   // Ensure credentials are sent with cross-origin requests
   crossDomain: true,
   // Don't modify the response data
   transformResponse: [function (data) {
-    return data ? JSON.parse(data) : data;
+    try {
+      return data ? JSON.parse(data) : data;
+    } catch (error) {
+      console.error('Error parsing response:', error);
+      return data;
+    }
   }]
 });
 

@@ -16,7 +16,39 @@ const app = express();
 
 // --- MIDDLEWARE SETUP ---
 // Enable CORS - Cross-Origin Resource Sharing
-app.use(cors({ origin: 'http://localhost:5174', credentials: true }));
+// Allow all localhost ports for development
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin && !isDevelopment) return callback(new Error('No origin provided'), false);
+    
+    // In development, allow all localhost origins
+    if (isDevelopment && (!origin || /^https?:\/\/localhost(:[0-9]+)?$/.test(origin))) {
+      return callback(null, true);
+    }
+    
+    // In production, you might want to be more restrictive
+    if (!isDevelopment) {
+      const allowedOrigins = [
+        'https://your-production-domain.com',
+      ];
+      
+      if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(new Error(`The CORS policy for this site does not allow access from the specified Origin: ${origin}`), false);
+      }
+    }
+    
+    return callback(null, true);
+  },
+  credentials: true,
+  exposedHeaders: ['set-cookie'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 // Body parser middleware to parse JSON data
 app.use(express.json());
